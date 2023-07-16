@@ -45,15 +45,54 @@
           {{ $t('login.loginAs', { name: currentUser.Name }) }}
         </h1>
         <h1 v-else class="text-h4 text-center">
-          {{ $t('login.login') }}
+          Sign up
         </h1>
         <h5 class="text-center mb-3 text--disabled">
           {{ $remote.auth.currentServer?.ServerName }}
         </h5>
-        <login-form
-          :user="currentUser"
-          @change="resetCurrentUser"
-          @navigateToSignUp="navigateToSignUp" />
+
+        <v-form v-model="valid" :disabled="loading" @submit.prevent="userSignUp">
+          <v-text-field
+            v-if="isEmpty(user)"
+            v-model="login.username"
+            variant="outlined"
+            hide-details
+            autofocus
+            :label="$t('username')"
+            :rules="rules" />
+          <v-text-field
+            v-model="login.password"
+            variant="outlined"
+            hide-details
+            class="mt-4"
+            :label="$t('password')"
+            :append-inner-icon="showPassword ? IconEyeOff : IconEye"
+            :type="showPassword ? 'text' : 'password'"
+            @click:append="() => (showPassword = !showPassword)" />
+          <v-row align="center" no-gutters class="mt-6 mb-6">
+            <v-col class="ml-2">
+              <v-btn
+                :disabled="!valid"
+                :loading="loading"
+                block
+                size="large"
+                color="primary"
+                variant="elevated"
+                type="submit">
+                Sign up
+              </v-btn>
+            </v-col>
+            <v-col>
+              <v-btn
+                block
+                size="large"
+                variant="elevated"
+                @click="navigateToSignIn()">
+                {{ $t('signIn') }}
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-form>
         <p class="text-p mt-6 text-center">{{ disclaimer }}</p>
       </v-col>
     </v-row>
@@ -74,15 +113,19 @@ import { getUserApi } from '@jellyfin/sdk/lib/utils/api/user-api';
 import { getSystemApi } from '@jellyfin/sdk/lib/utils/api/system-api';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { userLibrariesStore } from '@/store';
 import { useRemote } from '@/composables';
 
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const remote = useRemote();
+const login = ref({ username: '', password: '', rememberMe: true });
+const loading = ref(false);
 const api = remote.sdk.oneTimeSetup(
   remote.auth.currentServer?.PublicAddress || ''
 );
+const userLibraries = userLibrariesStore();
 
 route.meta.title = t('login.login');
 
@@ -124,7 +167,26 @@ function resetCurrentUser(): void {
 /**
  * navigateToSignUp page
  */
-function navigateToSignUp(): void {
-  router.push('/server/sign');
+function navigateToSignIn(): void {
+  router.push('/server/login');
+}
+
+/**
+ * navigateToSignUp page
+ */
+async function userSignUp(): Promise<void> {
+  loading.value = true;
+
+  console.log(login.value);
+
+  try {
+    await remote.auth.createUser(login.value.username, login.value.password);
+
+    await userLibraries.refresh();
+
+    router.replace('/');
+  } finally {
+    loading.value = false;
+  }
 }
 </script>

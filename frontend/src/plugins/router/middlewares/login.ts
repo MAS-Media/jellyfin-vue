@@ -9,7 +9,8 @@ import { useRemote } from '@/composables';
 const serverAddUrl = '/server/add';
 const serverSelectUrl = '/server/select';
 const serverLoginUrl = '/server/login';
-const routes = new Set([serverAddUrl, serverSelectUrl, serverLoginUrl]);
+const serverSignUp = '/server/sign';
+const routes = new Set([serverAddUrl, serverSelectUrl, serverLoginUrl, serverSignUp]);
 
 /**
  * Redirects to login page if there's no user logged in.

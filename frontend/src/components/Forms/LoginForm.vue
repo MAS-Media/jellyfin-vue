@@ -25,25 +25,7 @@
         color="primary"
         :label="$t('login.rememberMe')" />
       <v-row align="center" no-gutters>
-        <v-col class="mr-2">
-          <v-btn
-            v-if="isEmpty(user)"
-            to="/server/select"
-            block
-            size="large"
-            variant="elevated">
-            {{ $t('login.changeServer') }}
-          </v-btn>
-          <v-btn
-            v-else
-            block
-            size="large"
-            variant="elevated"
-            @click="$emit('change')">
-            {{ $t('login.changeUser') }}
-          </v-btn>
-        </v-col>
-        <v-col class="mr-2">
+        <v-col class="ml-2">
           <v-btn
             :disabled="!valid"
             :loading="loading"
@@ -53,6 +35,16 @@
             variant="elevated"
             type="submit">
             {{ $t('signIn') }}
+          </v-btn>
+        </v-col>
+        <v-col>
+          <v-btn
+            block
+            size="large"
+            variant="elevated"
+            :loading="loading"
+            @click="$emit('navigateToSignUp')">
+            Signup
           </v-btn>
         </v-col>
       </v-row>
@@ -78,6 +70,7 @@ const props = defineProps<{ user: UserDto }>();
 
 defineEmits<{
   (e: 'change'): void;
+  (e: 'navigateToSignUp'): void;
 }>();
 
 const router = useRouter();

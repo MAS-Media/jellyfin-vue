@@ -165,9 +165,14 @@ class RemotePluginAuth {
     }
 
     try {
-      const { data } = await useOneTimeAPI(
-        this.currentServer.PublicAddress
-      ).authenticateUserByName(username, password);
+      const { data } = await useOneTimeAPI('')
+        .axiosInstance.post('/auth/login', {
+          Pw: password,
+          Username: username
+        },
+        {
+          baseURL: 'http://localhost:3600/'
+        });
 
       state.value.rememberMe = rememberMe;
 
@@ -177,6 +182,52 @@ class RemotePluginAuth {
         state.value.users.push(data.User);
         state.value.currentUserIndex = state.value.users.indexOf(data.User);
       }
+    } catch (error: unknown) {
+      if (isAxiosError(error)) {
+        const { t } = usei18n();
+        let errorMessage = 'unexpectedError';
+
+        if (!error.response) {
+          errorMessage = error.message || t('login.serverNotFound');
+        } else if (
+          error.response.status === 500 ||
+          error.response.status === 401
+        ) {
+          errorMessage = t('incorrectUsernameOrPassword');
+        } else if (error.response.status === 400) {
+          errorMessage = t('badRequest');
+        }
+
+        useSnackbar(errorMessage, 'error');
+      }
+    }
+  }
+
+  /**
+   * Logs the user to the current server
+   *
+   * @param username
+   * @param password
+   * @param rememberMe
+   */
+  public async createUser(username: string, password: string): Promise<void> {
+    if (!this.currentServer) {
+      throw new Error('There is no server in use');
+    }
+
+    try {
+      const { data } = await useOneTimeAPI('').axiosInstance.post('/auth/register',
+        {
+          name: username,
+          password
+        },
+        {
+          baseURL: 'http://localhost:3600/'
+        });
+
+      console.log(data);
+
+      await this.loginUser(username, password, true);
     } catch (error: unknown) {
       if (isAxiosError(error)) {
         const { t } = usei18n();

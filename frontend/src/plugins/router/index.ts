@@ -93,19 +93,19 @@ watch(
        * redirect there and leave the middleware take care of the final destination
        * (when servers are already available, for example)
        */
-      router.replace('/server/add');
+      router.replace('/server/sign');
     } else if (
       !remote.auth.currentUser &&
       remote.auth.servers.length > 0 &&
       remote.auth.currentServer
     ) {
-      router.replace('/server/login');
+      router.replace('/server/sign');
     } else if (
       !remote.auth.currentUser &&
       remote.auth.servers.length > 0 &&
       !remote.auth.currentServer
     ) {
-      router.replace('/server/select');
+      router.replace('/server/sign');
     }
   }
 );
